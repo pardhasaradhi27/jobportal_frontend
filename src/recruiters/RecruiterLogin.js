@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import recruiterLoginImg from "../images/recruiterLogin.png";
+import AOS from "aos"; // Import AOS
+import "aos/dist/aos.css"; // Import AOS styles
 
 export default function RecruiterLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegisterClick = () => {
     navigate("/registerRecruiter");
@@ -14,6 +18,9 @@ export default function RecruiterLogin() {
 
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevent default form submission
+    setLoading(true);
+
+    setError("");
     try {
       const response = await axios.post(
         `http://localhost:8080/recruiterlogin/${encodeURIComponent(
@@ -32,7 +39,7 @@ export default function RecruiterLogin() {
 
         // Assuming the response contains the recruiter object
         const recruiterId = response.data.id; // Change according to your API response structure
-        localStorage.setItem("id", recruiterId); // Store recruiter ID in local storage
+        localStorage.setItem("recruiterId", recruiterId); // Store recruiter ID in local storage
         console.log(localStorage.getItem("id"));
 
         // Call your context function to manage auth state
@@ -41,87 +48,118 @@ export default function RecruiterLogin() {
         navigate("/recruiter");
       }
     } catch (error) {
+      setError("Invalid email or password. Please try again.");
+
       console.error("Login failed:", error);
-      alert("Invalid email or password. Please try again.");
+      // alert("Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    // Initialize AOS animations
+    AOS.init({
+      duration: 1000, // Set duration for animations
+      easing: "ease-in-out", // Easing effect for animations
+      once: true, // Animation happens only once
+    });
+  }, []);
+
   return (
     <div>
-      <section className="vh-100">
-        <div className="container-fluid h-custom">
+      <section
+        style={{
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          minHeight: "100vh",
+          backgroundColor: "#e7e7e5",
+        }}
+        className="vh-100 d-flex flex-column"
+      >
+        <div className="container-fluid h-100">
           <div className="row d-flex justify-content-center align-items-center h-100">
-            <div className="col-md-9 col-lg-6 col-xl-5">
+            <div
+              className="col-md-9 col-lg-6 col-xl-5"
+              data-aos="fade-right" // AOS fade-right animation
+            >
               <img src={recruiterLoginImg} className="img-fluid" alt="Sample" />
             </div>
-            <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-              <h1 className="text-center mb-4">Job Portal</h1>
-              <h5 className="text-center mb-4">Welcome</h5>
+            <div
+              className="col-md-8 col-lg-6 col-xl-4 offset-xl-1"
+              data-aos="fade-left" // AOS fade-left animation
+            >
+              <h1 className="text-center text-black mb-4" data-aos="fade-up">
+                Job Portal
+              </h1>
+              <h5 className="text-center text-black mb-4" data-aos="fade-up">
+                Welcome
+              </h5>
               <form onSubmit={handleLogin}>
-                {" "}
-                {/* Add onSubmit handler */}
                 {/* Email input */}
                 <div className="form-outline mb-4">
                   <input
-                    style={{ border: "2px solid #007bff" }}
+                    style={{
+                      border: "2px solid #007bff",
+
+                      color: "black",
+                    }}
                     type="email"
                     id="form3Example3"
                     className="form-control form-control-lg"
-                    placeholder="Enter a valid email address"
                     value={email} // Controlled input
                     onChange={(e) => setEmail(e.target.value)} // Handle input change
                     required
+                    data-aos="fade-up" // AOS fade-up animation
                   />
-                  <label className="form-label" htmlFor="form3Example3">
+                  <label
+                    className="form-label text-black"
+                    htmlFor="form3Example3"
+                  >
                     Email address
                   </label>
                 </div>
                 {/* Password input */}
                 <div className="form-outline mb-3">
                   <input
-                    style={{ border: "2px solid #007bff" }}
+                    style={{
+                      border: "2px solid #007bff",
+
+                      color: "black",
+                    }}
                     type="password"
                     id="form3Example4"
                     className="form-control form-control-lg"
-                    placeholder="Enter password"
                     value={password} // Controlled input
                     onChange={(e) => setPassword(e.target.value)} // Handle input change
                     required
+                    data-aos="fade-up" // AOS fade-up animation
                   />
-                  <label className="form-label" htmlFor="form3Example4">
+                  <label
+                    className="form-label text-black"
+                    htmlFor="form3Example4"
+                  >
                     Password
                   </label>
                 </div>
-                {/* <div className="d-flex justify-content-between align-items-center">
-                  
-                  <div className="form-check mb-0">
-                    <input
-                      className="form-check-input me-2"
-                      type="checkbox"
-                      id="form2Example3"
-                    />
-                    <label className="form-check-label" htmlFor="form2Example3">
-                      Remember me
-                    </label>
-                  </div>
-                  <a href="#!" className="text-body">
-                    Forgot password?
-                  </a>
-                </div> */}
+                {error && <div className="alert alert-danger">{error}</div>}
                 <div className="text-center text-lg-start mt-4 pt-2">
                   <button
                     type="submit"
                     className="btn btn-primary btn-lg"
                     style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
+                    disabled={loading}
+                    data-aos="zoom-in" // AOS zoom-in animation
                   >
-                    Login
+                    {loading ? "Logging in..." : "Login"}
                   </button>
-                  <p className="small fw-bold mt-2 pt-1 mb-0">
+                  <p className="small fw-bold mt-2 pt-1 mb-0 text-black">
                     Don't have an account?{" "}
                     <button
                       className="btn btn-link p-0 link-danger"
                       style={{ textDecoration: "none" }}
                       onClick={handleRegisterClick}
+                      data-aos="fade-up" // AOS fade-up animation
                     >
                       Register
                     </button>
@@ -132,27 +170,17 @@ export default function RecruiterLogin() {
           </div>
         </div>
 
-        <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
-          {/* Copyright */}
-          <div className="text-white mb-3 mb-md-0">
-            Copyright © 2020. All rights reserved.
-          </div>
-          {/* Right */}
-          {/* <div>
-            <a href="#!" className="text-white me-4">
-              <i className="fab fa-facebook-f"></i>
-            </a>
-            <a href="#!" className="text-white me-4">
-              <i className="fab fa-twitter"></i>
-            </a>
-            <a href="#!" className="text-white me-4">
-              <i className="fab fa-google"></i>
-            </a>
-            <a href="#!" className="text-white">
-              <i className="fab fa-linkedin-in"></i>
-            </a>
-          </div> */}
-        </div>
+        <footer
+          className="text-center py-3 mt-auto shadow-sm"
+          style={{
+            backgroundColor: "#282828",
+          }}
+          data-aos="fade-up" // AOS fade-up animation
+        >
+          <p className="mb-0 text-light">
+            &copy; {new Date().getFullYear()} Job Portal. All Rights Reserved.
+          </p>
+        </footer>
       </section>
     </div>
   );

@@ -1,13 +1,82 @@
-import React from "react";
-import "bootstrap/dist/css/bootstrap.min.css"; // Make sure Bootstrap is imported
-import "@fortawesome/fontawesome-free/css/all.min.css"; // Make sure FontAwesome is imported
-import "./admin.css";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-export default function AdminLogin() {
+export default function UserLogin() {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // const handleRegisterClick = () => {
+  //   navigate("/registeruser");
+  // };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.post(
+        `http://localhost:8080/adminLogin/${username}/${password}`,
+        null,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Assuming the backend sends a JWT token in the response
+        // const token = response.data.token; // Get JWT token from response
+        // const userId = response.data.userId;
+        // const userEmail = response.data.email;
+        console.log(response.data);
+
+        // Store JWT token and other user info in localStorage
+        // localStorage.setItem("jwtToken", token);
+        // localStorage.setItem("userId", userId);
+        // localStorage.setItem("userEmail", userEmail);
+
+        alert("Login successful!");
+        // console.log(localStorage.getItem("userEmail"));
+        // console.log(localStorage.getItem("userId"));
+        navigate("/admin"); // Redirect after login
+      }
+    } catch (err) {
+      console.error("Login failed:", err);
+      if (err.response) {
+        console.error("Error response:", err.response);
+        setError(
+          `Error: ${err.response.data ? err.response.data : "Unknown error"}`
+        );
+      } else if (err.request) {
+        console.error("Error request:", err.request);
+        setError("Network error: No response from server.");
+      } else {
+        console.error("Error message:", err.message);
+        setError("An unknown error occurred.");
+      }
+      setError("Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
-      <section className="vh-100">
-        <div className="container-fluid h-custom">
+      <section
+        style={{
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          minHeight: "100vh",
+          backgroundColor: "#1a1a1a",
+        }}
+        className="vh-100 d-flex flex-column"
+      >
+        <div className="container-fluid h-100">
           <div className="row d-flex justify-content-center align-items-center h-100">
             <div className="col-md-9 col-lg-6 col-xl-5">
               <img
@@ -17,89 +86,64 @@ export default function AdminLogin() {
               />
             </div>
             <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-              <form>
-                {/* <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                  <p className="lead fw-normal mb-0 me-3">Sign in with</p>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-floating mx-1"
-                  >
-                    <i className="fab fa-facebook-f"></i>
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-floating mx-1"
-                  >
-                    <i className="fab fa-twitter"></i>
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-floating mx-1"
-                  >
-                    <i className="fab fa-linkedin-in"></i>
-                  </button>
-                </div> */}
+              <h1 className="text-center text-light mb-4">Job Portal</h1>
+              <h5 className="text-center text-light mb-4">Welcome</h5>
 
-                {/* <div className="divider d-flex align-items-center my-4">
-                  <p className="text-center fw-bold mx-3 mb-0">Or</p>
-                </div> */}
-
-                {/* Email input */}
+              <form onSubmit={handleLogin}>
                 <div className="form-outline mb-4">
                   <input
-                    type="email"
-                    id="form3Example3"
+                    style={{
+                      border: "2px solid #007bff",
+                      backgroundColor: "#282828",
+                      color: "white",
+                    }}
+                    type="text"
                     className="form-control form-control-lg"
-                    placeholder="Enter a valid email address"
+                    // placeholder="Enter a valid username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
                   />
-                  <label className="form-label" htmlFor="form3Example3">
-                    Email address
-                  </label>
+                  <label className="form-label text-light">Username</label>
                 </div>
 
-                {/* Password input */}
                 <div className="form-outline mb-3">
                   <input
+                    style={{
+                      border: "2px solid #007bff",
+                      backgroundColor: "#282828",
+                      color: "white",
+                    }}
                     type="password"
-                    id="form3Example4"
                     className="form-control form-control-lg"
-                    placeholder="Enter password"
+                    // placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                   />
-                  <label className="form-label" htmlFor="form3Example4">
-                    Password
-                  </label>
+                  <label className="form-label text-light">Password</label>
                 </div>
 
-                {/* <div className="d-flex justify-content-between align-items-center">
-                  
-                  <div className="form-check mb-0">
-                    <input
-                      className="form-check-input me-2"
-                      type="checkbox"
-                      id="form2Example3"
-                    />
-                    <label className="form-check-label" htmlFor="form2Example3">
-                      Remember me
-                    </label>
-                  </div>
-                  <a href="#!" className="text-body">
-                    Forgot password?
-                  </a>
-                </div> */}
+                {error && <div className="alert alert-danger">{error}</div>}
 
                 <div className="text-center text-lg-start mt-4 pt-2">
                   <button
                     type="submit"
                     className="btn btn-primary btn-lg"
                     style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
+                    disabled={loading}
                   >
-                    Login
+                    {loading ? "Logging in..." : "Login"}
                   </button>
                   {/* <p className="small fw-bold mt-2 pt-1 mb-0">
                     Don't have an account?{" "}
-                    <a href="#!" className="link-danger">
+                    <button
+                      className="btn btn-link p-0 link-danger"
+                      style={{ textDecoration: "none" }}
+                      onClick={handleRegisterClick}
+                    >
                       Register
-                    </a>
+                    </button>
                   </p> */}
                 </div>
               </form>
@@ -107,27 +151,16 @@ export default function AdminLogin() {
           </div>
         </div>
 
-        <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
-          {/* Copyright */}
-          <div className="text-white mb-3 mb-md-0">
-            Copyright © 2020. All rights reserved.
-          </div>
-          {/* Right */}
-          {/* <div>
-            <a href="#!" className="text-white me-4">
-              <i className="fab fa-facebook-f"></i>
-            </a>
-            <a href="#!" className="text-white me-4">
-              <i className="fab fa-twitter"></i>
-            </a>
-            <a href="#!" className="text-white me-4">
-              <i className="fab fa-google"></i>
-            </a>
-            <a href="#!" className="text-white">
-              <i className="fab fa-linkedin-in"></i>
-            </a>
-          </div> */}
-        </div>
+        <footer
+          className="text-center py-3 mt-auto shadow-sm"
+          style={{
+            backgroundColor: "#282828",
+          }}
+        >
+          <p className="mb-0 text-light">
+            &copy; {new Date().getFullYear()} Job Portal. All Rights Reserved.
+          </p>
+        </footer>
       </section>
     </div>
   );

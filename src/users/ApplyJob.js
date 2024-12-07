@@ -1,54 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import bgImage from "../images/applyjob.jpg";
-
-// Navbar component
-const Navbar = () => {
-  const navigate = useNavigate();
-
-  return (
-    <nav
-      className="navbar navbar-expand-lg navbar-light mb-4"
-      style={{
-        backgroundColor: "#dceefe",
-      }}
-    >
-      <div className="container-fluid">
-        <a className="navbar-brand" href="/">
-          Job Portal
-        </a>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav">
-            <li className="nav-item">
-              <button
-                className="nav-link btn btn-link" // Using button with link style
-                onClick={() => navigate(-1)} // Navigate back
-              >
-                Back
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  );
-};
+import Navbar from "../Navbar";
+import AOS from "aos"; // Import AOS
+import "aos/dist/aos.css"; // Import AOS styles
+import "./applyjob.css"; // Import your applyjob.css file
+import tips from "../images/tips.png";
 
 export default function ApplyJob() {
   const { id } = useParams(); // Get the job id from the URL parameters
   const navigate = useNavigate(); // Initialize useNavigate to redirect after form submission
+  console.log(id);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -58,6 +20,21 @@ export default function ApplyJob() {
     age: "",
     job_id: id, // Initialize jobId with the value from URL parameters
   });
+  console.log(formData.job_id);
+
+  useEffect(() => {
+    // Check if the user is logged in
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      navigate("/loginuser"); // Redirect to login if not logged in
+    }
+
+    // Initialize AOS
+    AOS.init({
+      duration: 1000, // Set duration for animations
+      easing: "ease-in-out", // Easing function
+    });
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -69,22 +46,28 @@ export default function ApplyJob() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const { firstName, lastName, email, mobile, age, job_id } = formData;
+
       const applicationData = {
-        mobile: formData.mobile,
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        age: formData.age, // Include company in jobData
-        job: { id: formData.job_id }, // Associate the recruiter by id
+        firstName,
+        lastName,
+        email,
+        mobile,
+        age,
+        job: {
+          id: job_id, // Pass job_id as part of the job object
+        },
       };
-      console.log("Submitting application:", applicationData);
 
       // Submit the form data to the backend
-      await axios.post("http://localhost:8080/application", applicationData);
-      alert("Application submitted successfully!");
+      await axios.post("http://localhost:8080/application", applicationData, {
+        headers: {
+          "Content-Type": "application/json", // Ensure the request is treated as JSON
+        },
+      });
 
-      // Redirect back to the User page after submission
-      navigate("/user");
+      alert("Application submitted successfully!");
+      navigate("/user"); // Redirect back to the User page after submission
     } catch (error) {
       console.error("Error submitting application:", error);
       alert("Failed to submit application.");
@@ -95,29 +78,71 @@ export default function ApplyJob() {
     <div
       className="applyjob"
       style={{
-        backgroundImage: `url(${bgImage})`, // Use the imported background image
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: "100vh",
+        backgroundColor: "#e7e7e5",
+        position: "relative", // To allow positioning of the floating card
       }}
     >
-      <Navbar /> {/* Add the Navbar here */}
-      <div className="container my-5">
-        <h2 className="text-center mb-4">Apply for Job</h2>
+      <Navbar />
+      <div className="container my-5 d-flex justify-content-between">
         <div
-          className="card border-0 mx-auto"
+          className="floating-card"
+          data-aos="fade-up"
+          style={{
+            position: "absolute",
+            left: "80px",
+            top: "20%",
+            width: "200px",
+            height: "300px",
+            backgroundColor: "transparent", // Set background to transparent
+            color: "#fff", // Keep text color for visibility
+            borderRadius: "10px",
+            // boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)", // You can keep the shadow for a floating effect
+            animation: "float 2s infinite ease-in-out",
+          }}
+        >
+          <div
+            className="card-body"
+            style={{
+              padding: "20px",
+              // textAlign: "center",
+            }}
+          >
+            {/* Add Image */}
+            <img
+              src={tips} // Replace with the correct image path
+              alt="Job Application"
+              style={{
+                width: "100px", // Adjust image width as needed
+                height: "auto", // Maintain aspect ratio
+                borderRadius: "8px", // Optional: If you want rounded corners
+                marginBottom: "15px", // Add margin below the image
+              }}
+            />
+            {/* <h4>Job Application</h4> */}
+            <p className="text-black">
+              Apply for the job and secure your future. Good skills can lead to
+              higher chances of getting a Job.
+            </p>
+          </div>
+        </div>
+
+        <div
+          className="card border-0 mx-auto text-black"
           style={{
             width: "650px",
             height: "700px",
             borderRadius: "20px",
-            backgroundColor: "#dceefe",
           }}
+          data-aos="fade-up"
         >
           <div className="card-body d-flex flex-column align-items-center">
+            <h2>Apply for job</h2>
             <form onSubmit={handleSubmit}>
-              <input type="hidden" name="jobId" value={formData.job_id} />{" "}
-              {/* Hidden input for job_id */}
-              <div className="form-group mb-3 mt-3">
+              <input type="hidden" name="jobId" value={formData.job_id} />
+              <div className="form-group mb-3 mt-3" data-aos="fade-up">
                 <label htmlFor="firstName">First Name</label>
                 <input
                   type="text"
@@ -128,13 +153,15 @@ export default function ApplyJob() {
                   onChange={handleChange}
                   required
                   style={{
+                    borderRadius: "10px",
                     borderWidth: "1px",
-                    borderColor: "black",
-                    backgroundColor: "#dceefe",
+                    borderColor: "#fff",
+                    backgroundColor: "#e7e7e5",
+                    color: "black",
                   }}
                 />
               </div>
-              <div className="form-group mb-3">
+              <div className="form-group mb-3" data-aos="fade-up">
                 <label htmlFor="lastName">Last Name</label>
                 <input
                   type="text"
@@ -145,13 +172,15 @@ export default function ApplyJob() {
                   onChange={handleChange}
                   required
                   style={{
+                    borderRadius: "10px",
                     borderWidth: "1px",
-                    borderColor: "black",
-                    backgroundColor: "#dceefe",
+                    borderColor: "#fff",
+                    backgroundColor: "#e7e7e5",
+                    color: "black",
                   }}
                 />
               </div>
-              <div className="form-group mb-3">
+              <div className="form-group mb-3" data-aos="fade-up">
                 <label htmlFor="email">Email</label>
                 <input
                   type="email"
@@ -162,13 +191,15 @@ export default function ApplyJob() {
                   onChange={handleChange}
                   required
                   style={{
+                    borderRadius: "10px",
                     borderWidth: "1px",
-                    borderColor: "black",
-                    backgroundColor: "#dceefe",
+                    borderColor: "#fff",
+                    backgroundColor: "#e7e7e5",
+                    color: "black",
                   }}
                 />
               </div>
-              <div className="form-group mb-3">
+              <div className="form-group mb-3" data-aos="fade-up">
                 <label htmlFor="mobile">Mobile</label>
                 <input
                   type="text"
@@ -179,13 +210,15 @@ export default function ApplyJob() {
                   onChange={handleChange}
                   required
                   style={{
+                    borderRadius: "10px",
                     borderWidth: "1px",
-                    borderColor: "black",
-                    backgroundColor: "#dceefe",
+                    borderColor: "#fff",
+                    backgroundColor: "#e7e7e5",
+                    color: "black",
                   }}
                 />
               </div>
-              <div className="form-group mb-3">
+              <div className="form-group mb-3" data-aos="fade-up">
                 <label htmlFor="age">Age</label>
                 <input
                   type="number"
@@ -196,30 +229,21 @@ export default function ApplyJob() {
                   onChange={handleChange}
                   required
                   style={{
+                    borderRadius: "10px",
                     borderWidth: "1px",
-                    borderColor: "black",
-                    backgroundColor: "#dceefe",
+                    borderColor: "#fff",
+                    backgroundColor: "#e7e7e5",
                     width: "550px",
+                    color: "black",
                   }}
                 />
               </div>
-              <div className="form-group mb-3">
-                <label htmlFor="resume">Resume</label>
-                <input
-                  type="file"
-                  className="form-control"
-                  id="resume"
-                  name="resume"
-                  // onChange={handleResumeChange} // Handle resume input
-                  // removed required attribute to allow submission without a file
-                  style={{
-                    borderWidth: "1px",
-                    borderColor: "black",
-                    backgroundColor: "#dceefe",
-                  }}
-                />
-              </div>
-              <button type="submit" className="btn btn-success">
+              <button
+                type="submit"
+                style={{ borderRadius: "10px" }}
+                className="btn btn-success"
+                data-aos="fade-up"
+              >
                 Submit Application
               </button>
             </form>

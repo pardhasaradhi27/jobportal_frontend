@@ -14,12 +14,18 @@ import ViewJob from "./users/ViewJob";
 import ApplyJob from "./users/ApplyJob";
 import AddJob from "./recruiters/AddJob";
 import Applications from "./recruiters/Applications";
+import Jobs from "./users/Jobs";
+import JobApplications from "./users/JobApplications";
+import PrivateRoute from "./PrivateRoute";
+import Profile from "./users/Profile";
+import RecProfile from "./recruiters/RecProfile";
+import AdminPage from "./admin/AdminPage";
 
 function App() {
   return (
     <div className="App">
       {/* Wrap your app with AuthProvider */}
-      <Router>
+      <Router basename="/">
         <Routes>
           <Route exact path="/" element={<Home />} />
           <Route exact path="/loginuser" element={<UserLogin />} />
@@ -30,10 +36,35 @@ function App() {
             path="/registerRecruiter"
             element={<RecruiterRegister />}
           />
-          <Route exact path="/admin" element={<AdminLogin />} />
-          <Route exact path="/user" element={<UserHome />} />
-          <Route exact path="/user/job/:id" element={<ViewJob />} />
-          <Route exact path="/user/applyjob/:id" element={<ApplyJob />} />
+          <Route exact path="/loginadmin" element={<AdminLogin />} />
+          <Route exact path="/admin" element={<AdminPage />} />
+          <Route
+            exact
+            path="/user"
+            element={
+              <PrivateRoute>
+                <UserHome />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            exact
+            path="/user/job/:id"
+            element={
+              <PrivateRoute>
+                <ViewJob />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            exact
+            path="/user/applyjob/:id"
+            element={
+              <PrivateRoute>
+                <ApplyJob />
+              </PrivateRoute>
+            }
+          />
           <Route exact path="/recruiter" element={<RecruiterHome />} />
           <Route exact path="/recruiter/addjob" element={<AddJob />} />
           <Route
@@ -41,6 +72,34 @@ function App() {
             path="/recruiter/applications"
             element={<Applications />}
           />
+          <Route
+            exact
+            path="/user/jobs"
+            element={
+              <PrivateRoute>
+                <Jobs />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            exact
+            path="/user/applications"
+            element={
+              <PrivateRoute>
+                <JobApplications />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            exact
+            path="/user/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route exact path="/recruiter/profile" element={<RecProfile />} />
         </Routes>
       </Router>
     </div>
